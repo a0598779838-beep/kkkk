@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة تسجيل البيانات للتقدم للوظائف</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #f8fafc;
+    }
+    .step-active {
+      border-color: #2563eb;
+      background-color: #eff6ff;
+      color: #1d4ed8;
+    }
+    .step-completed {
+      border-color: #10b981;
+      background-color: #ecfdf5;
+      color: #047857;
+    }
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background-color: #ffffff;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col">
+
+  <!-- Top Header -->
+  <header class="bg-gradient-to-l from-blue-800 via-blue-700 to-indigo-800 text-white shadow-md no-print">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center border border-white/25">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight">بوابة التوظيف وتسجيل بيانات المتقدمين</h1>
+          <p class="text-xs sm:text-sm text-blue-100">نموذج شامل لتسجيل بياناتك الشخصية والمؤهلات والخبرات للاستفادة من الفرص الوظيفية</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="btnFillDemo" type="button" class="px-3.5 py-2 rounded-lg bg-white/15 hover:bg-white/25 text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 border border-white/20">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span>تعبئة بيانات تجريبية</span>
+        </button>
+        <button id="btnSwitchView" type="button" class="px-3.5 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs sm:text-sm font-bold transition flex items-center gap-1.5 shadow-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <span id="switchViewLabel">سجل الطلبات (<span id="savedCountBadge">0</span>)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Toast Notification -->
+  <div id="toastBox" class="fixed top-5 left-5 z-50 hidden max-w-sm bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700 flex items-center gap-3 no-print">
+    <span id="toastIcon" class="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0"></span>
+    <p id="toastMessage" class="text-sm font-medium"></p>
+  </div>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6">
+
+    <!-- VIEW 1: REGISTRATION FORM -->
+    <section id="formView" class="space-y-6">
+
+      <!-- Progress Bar & Steps Navigation -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 no-print">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs sm:text-sm font-bold text-slate-700">نسبة اكتمال البيانات</span>
+          <span id="completionPercent" class="text-xs sm:text-sm font-extrabold text-blue-600">25%</span>
+        </div>
+        <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden mb-5">
+          <div id="progressBar" class="h-full bg-gradient-to-l from-blue-600 to-indigo-600 transition-all duration-300" style="width: 25%"></div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <button type="button" data-step="1" class="step-tab flex items-center gap-2.5 p-2.5 rounded-xl border-2 text-right transition step-active">
+            <span class="w-7 h-7 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0">1</span>
+            <div class="truncate">
+              <div class="text-xs font-bold">البيانات الشخصية</div>
+              <div class="text-[11px] opacity-75">الاسم والاتصال</div>
+            </div>
+          </button>
+
+          <button type="button" data-step="2" class="step-tab flex items-center gap-2.5 p-2.5 rounded-xl border-2 border-slate-200 text-slate-600 text-right transition hover:bg-slate-50">
+            <span class="w-7 h-7 rounded-lg bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0">2</span>
+            <div class="truncate">
+              <div class="text-xs font-bold">المؤهلات والمهارات</div>
+              <div class="text-[11px] opacity-75">التعليم واللغات</div>
+            </div>
+          </button>
+
+          <button type="button" data-step="3" class="step-tab flex items-center gap-2.5 p-2.5 rounded-xl border-2 border-slate-200 text-slate-600 text-right transition hover:bg-slate-50">
+            <span class="w-7 h-7 rounded-lg bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0">3</span>
+            <div class="truncate">
+              <div class="text-xs font-bold">الوظيفة والخبرات</div>
+              <div class="text-[11px] opacity-75">المسمى والسيرة</div>
+            </div>
+          </button>
+
+          <button type="button" data-step="4" class="step-tab flex items-center gap-2.5 p-2.5 rounded-xl border-2 border-slate-200 text-slate-600 text-right transition hover:bg-slate-50">
+            <span class="w-7 h-7 rounded-lg bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0">4</span>
+            <div class="truncate">
+              <div class="text-xs font-bold">المراجعة والإرسال</div>
+              <div class="text-[11px] opacity-75">تأكيد الطلب</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Multi-Step Form -->
+      <form id="applicationForm" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-7" novalidate>
+
+        <!-- STEP 1: PERSONAL INFO -->
+        <div id="stepPanel1" class="step-panel space-y-6">
+          <div class="border-b border-slate-100 pb-4 flex items-center justify-between">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">أولاً: البيانات الشخصية ومعلومات التواصل</h2>
+              <p class="text-xs text-slate-500 mt-0.5">يرجى إدخال اسمك الكامل وبيانات الهوية والتواصل بدقة كما هي في الوثائق الرسمية</p>
+            </div>
+            <span class="text-xs bg-blue-50 text-blue-700 font-semibold px-3 py-1 rounded-full">الخطوة 1 من 4</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="sm:col-span-2">
+              <label for="fullName" class="block text-xs font-bold text-slate-700 mb-1.5">الاسم الرباعي الكامل <span class="text-rose-500">*</span></label>
+              <input id="fullName" type="text" required placeholder="مثال: أحمد محمد عبد الله النجار" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+
+            <div>
+              <label for="nationalId" class="block text-xs font-bold text-slate-700 mb-1.5">رقم الهوية / جواز السفر <span class="text-rose-500">*</span></label>
+              <input id="nationalId" type="text" required placeholder="أدخل رقم الهوية المكون من 9-14 رقماً" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+
+            <div>
+              <label for="birthDate" class="block text-xs font-bold text-slate-700 mb-1.5">تاريخ الميلاد <span class="text-rose-500">*</span></label>
+              <input id="birthDate" type="date" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+
+            <div>
+              <label for="gender" class="block text-xs font-bold text-slate-700 mb-1.5">الجنس <span class="text-rose-500">*</span></label>
+              <select id="gender" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="ذكر">ذكر</option>
+                <option value="أنثى">أنثى</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="maritalStatus" class="block text-xs font-bold text-slate-700 mb-1.5">الحالة الاجتماعية</label>
+              <select id="maritalStatus" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="أعزب / عزباء">أعزب / عزباء</option>
+                <option value="متزوج / متزوجة">متزوج / متزوجة</option>
+                <option value="أخرى">أخرى</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="phone" class="block text-xs font-bold text-slate-700 mb-1.5">رقم الجوال الأساسي <span class="text-rose-500">*</span></label>
+              <input id="phone" type="tel" required placeholder="مثال: 0599123456" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div>
+              <label for="altPhone" class="block text-xs font-bold text-slate-700 mb-1.5">رقم هاتف بديل / واتساب</label>
+              <input id="altPhone" type="tel" placeholder="اختياري للتواصل السريع" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div>
+              <label for="email" class="block text-xs font-bold text-slate-700 mb-1.5">البريد الإلكتروني <span class="text-rose-500">*</span></label>
+              <input id="email" type="email" required placeholder="name@example.com" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div>
+              <label for="city" class="block text-xs font-bold text-slate-700 mb-1.5">المحافظة / المدينة <span class="text-rose-500">*</span></label>
+              <input id="city" type="text" required placeholder="مثال: غزة، رام الله، عمّان..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="address" class="block text-xs font-bold text-slate-700 mb-1.5">العنوان التفصيلي <span class="text-rose-500">*</span></label>
+              <input id="address" type="text" required placeholder="الحي، الشارع، أقرب معلم بارز" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: EDUCATION & SKILLS -->
+        <div id="stepPanel2" class="step-panel space-y-6 hidden">
+          <div class="border-b border-slate-100 pb-4 flex items-center justify-between">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">ثانياً: المؤهلات العلمية والمهارات</h2>
+              <p class="text-xs text-slate-500 mt-0.5">أضف مؤهلك الأكاديمي، اللغات، والمهارات التي تميزك في بيئة العمل</p>
+            </div>
+            <span class="text-xs bg-blue-50 text-blue-700 font-semibold px-3 py-1 rounded-full">الخطوة 2 من 4</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label for="degree" class="block text-xs font-bold text-slate-700 mb-1.5">المؤهل العلمي <span class="text-rose-500">*</span></label>
+              <select id="degree" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="بكالوريوس">بكالوريوس</option>
+                <option value="دبلوم متوسط">دبلوم متوسط</option>
+                <option value="ماجستير">ماجستير</option>
+                <option value="دكتوراه">دكتوراه</option>
+                <option value="ثانوية عامة">ثانوية عامة</option>
+                <option value="تدريب مهني">تدريب مهني</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="major" class="block text-xs font-bold text-slate-700 mb-1.5">التخصص الدراسي <span class="text-rose-500">*</span></label>
+              <input id="major" type="text" required placeholder="مثال: هندسة برمجيات، محاسبة، إدارة أعمال..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div>
+              <label for="university" class="block text-xs font-bold text-slate-700 mb-1.5">الجامعة / المؤسسة التعليمية <span class="text-rose-500">*</span></label>
+              <input id="university" type="text" required placeholder="اسم الجامعة أو الكلية" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div>
+              <label for="gradYear" class="block text-xs font-bold text-slate-700 mb-1.5">سنة التخرج <span class="text-rose-500">*</span></label>
+              <input id="gradYear" type="number" min="1980" max="2030" placeholder="2024" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div>
+              <label for="gpa" class="block text-xs font-bold text-slate-700 mb-1.5">التقدير / المعدل التراكمي</label>
+              <input id="gpa" type="text" placeholder="مثال: جيد جداً (85%)" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div>
+              <label for="englishLevel" class="block text-xs font-bold text-slate-700 mb-1.5">مستوى اللغة الإنجليزية</label>
+              <select id="englishLevel" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="ممتاز">ممتاز (تحدث وكتابة)</option>
+                <option value="جيد جداً">جيد جداً</option>
+                <option value="متوسط">متوسط</option>
+                <option value="مبتدئ">مبتدئ</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Interactive Skills Adder -->
+          <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-3">
+            <label for="skillInput" class="block text-xs font-bold text-slate-700">المهارات المهنية والتقنية (أضف مهارة واضغط إضافة)</label>
+            <div class="flex gap-2">
+              <input id="skillInput" type="text" placeholder="مثال: إدارة المشاريع، Excel المتقدم، التصميم الجرافيكي..." class="flex-1 rounded-xl border border-slate-300 px-3.5 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <button id="btnAddSkill" type="button" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shrink-0">
+                + إضافة مهارة
+              </button>
+            </div>
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <span class="text-[11px] text-slate-500 ml-2 self-center">اقتراحات سريعة:</span>
+              <button type="button" data-quick-skill="العمل الجماعي" class="quick-skill text-[11px] bg-white border border-slate-300 hover:border-blue-500 text-slate-700 px-2.5 py-1 rounded-lg transition">+ العمل الجماعي</button>
+              <button type="button" data-quick-skill="مايكروسوفت أوفيس" class="quick-skill text-[11px] bg-white border border-slate-300 hover:border-blue-500 text-slate-700 px-2.5 py-1 rounded-lg transition">+ مايكروسوفت أوفيس</button>
+              <button type="button" data-quick-skill="خدمة العملاء" class="quick-skill text-[11px] bg-white border border-slate-300 hover:border-blue-500 text-slate-700 px-2.5 py-1 rounded-lg transition">+ خدمة العملاء</button>
+              <button type="button" data-quick-skill="تحليل البيانات" class="quick-skill text-[11px] bg-white border border-slate-300 hover:border-blue-500 text-slate-700 px-2.5 py-1 rounded-lg transition">+ تحليل البيانات</button>
+              <button type="button" data-quick-skill="حل المشكلات" class="quick-skill text-[11px] bg-white border border-slate-300 hover:border-blue-500 text-slate-700 px-2.5 py-1 rounded-lg transition">+ حل المشكلات</button>
+            </div>
+            <div id="skillsContainer" class="flex flex-wrap gap-2 pt-2"></div>
+          </div>
+
+          <div>
+            <label for="courses" class="block text-xs font-bold text-slate-700 mb-1.5">الدورات التدريبية والشهادات المهنية</label>
+            <textarea id="courses" rows="3" placeholder="اذكر أهم الدورات التدريبية أو الشهادات التي حصلت عليها..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+        </div>
+
+        <!-- STEP 3: TARGET JOB & EXPERIENCE -->
+        <div id="stepPanel3" class="step-panel space-y-6 hidden">
+          <div class="border-b border-slate-100 pb-4 flex items-center justify-between">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">ثالثاً: الوظيفة المطلوبة والخبرات العملية</h2>
+              <p class="text-xs text-slate-500 mt-0.5">حدد المسمى الوظيفي الذي ترغب بالاستفادة منه وسجّل خبراتك السابقة</p>
+            </div>
+            <span class="text-xs bg-blue-50 text-blue-700 font-semibold px-3 py-1 rounded-full">الخطوة 3 من 4</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label for="jobTitle" class="block text-xs font-bold text-slate-700 mb-1.5">المسمى الوظيفي المطلوب <span class="text-rose-500">*</span></label>
+              <input id="jobTitle" type="text" required placeholder="مثال: منسق مشاريع، محاسب، مطور ويب..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div>
+              <label for="department" class="block text-xs font-bold text-slate-700 mb-1.5">القسم / القطاع الوظيفي <span class="text-rose-500">*</span></label>
+              <select id="department" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="تكنولوجيا المعلومات والبرمجة">تكنولوجيا المعلومات والبرمجة</option>
+                <option value="الإدارة والموارد البشرية">الإدارة والموارد البشرية</option>
+                <option value="المحاسبة والمالية">المحاسبة والمالية</option>
+                <option value="التسويق والمبيعات">التسويق والمبيعات</option>
+                <option value="الهندسة والإنشاءات">الهندسة والإنشاءات</option>
+                <option value="التعليم والتدريب">التعليم والتدريب</option>
+                <option value="الصحة والرعاية">الصحة والرعاية</option>
+                <option value="الخدمات اللوجستية والميدانية">الخدمات اللوجستية والميدانية</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="workType" class="block text-xs font-bold text-slate-700 mb-1.5">نوع الدوام المفضل</label>
+              <select id="workType" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="دوام كامل">دوام كامل</option>
+                <option value="دوام جزئي">دوام جزئي</option>
+                <option value="عمل عن بُعد">عمل عن بُعد</option>
+                <option value="نظام عقود / مشاريع">نظام عقود / مشاريع</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="expYears" class="block text-xs font-bold text-slate-700 mb-1.5">إجمالي سنوات الخبرة <span class="text-rose-500">*</span></label>
+              <select id="expYears" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="حديث تخرج (بدون خبرة)">حديث تخرج (بدون خبرة)</option>
+                <option value="أقل من سنة">أقل من سنة</option>
+                <option value="1 - 3 سنوات">1 - 3 سنوات</option>
+                <option value="3 - 5 سنوات">3 - 5 سنوات</option>
+                <option value="أكثر من 5 سنوات">أكثر من 5 سنوات</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="expectedSalary" class="block text-xs font-bold text-slate-700 mb-1.5">الراتب المتوقع (شهرياً)</label>
+              <input id="expectedSalary" type="text" placeholder="مثال: 800 دولار أو قابل للتفاوض" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div>
+              <label for="availableDate" class="block text-xs font-bold text-slate-700 mb-1.5">تاريخ الجاهزية لمباشرة العمل</label>
+              <select id="availableDate" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="فوراً">فوراً</option>
+                <option value="خلال أسبوع">خلال أسبوع</option>
+                <option value="خلال أسبوعين">خلال أسبوعين</option>
+                <option value="خلال شهر">خلال شهر</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Dynamic Previous Experience Section -->
+          <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-700">الخبرات العملية السابقة (اختياري)</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <input id="expCompany" type="text" placeholder="اسم جهة العمل / الشركة" class="rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm bg-white" />
+              <input id="expRole" type="text" placeholder="المسمى الوظيفي" class="rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm bg-white" />
+              <div class="flex gap-2">
+                <input id="expPeriod" type="text" placeholder="الفترة (مثال: 2022 - 2024)" class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm bg-white" />
+                <button id="btnAddExp" type="button" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shrink-0">
+                  + إضافة
+                </button>
+              </div>
+            </div>
+            <div id="expListContainer" class="space-y-2 pt-1"></div>
+          </div>
+
+          <!-- CV File Upload & Portfolio -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="cvFile" class="block text-xs font-bold text-slate-700 mb-1.5">إرفاق السيرة الذاتية (PDF / Word)</label>
+              <label for="cvFile" class="flex items-center justify-between w-full rounded-xl border-2 border-dashed border-slate-300 hover:border-blue-500 px-4 py-3 cursor-pointer bg-slate-50 transition">
+                <div class="flex items-center gap-2.5 truncate">
+                  <svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <span id="cvFileName" class="text-xs text-slate-600 truncate">اضغط لاختيار ملف السيرة الذاتية...</span>
+                </div>
+                <span class="text-xs font-bold text-blue-600 shrink-0">استعراض</span>
+              </label>
+              <input id="cvFile" type="file" accept=".pdf,.doc,.docx" class="hidden" />
+            </div>
+
+            <div>
+              <label for="portfolioUrl" class="block text-xs font-bold text-slate-700 mb-1.5">رابط معرض الأعمال أو حساب LinkedIn</label>
+              <input id="portfolioUrl" type="url" placeholder="https://linkedin.com/in/username" class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+
+          <div>
+            <label for="coverLetter" class="block text-xs font-bold text-slate-700 mb-1.5">نبذة تعريفية / لماذا أنت مرشح مناسب لهذه الوظيفة؟ <span class="text-rose-500">*</span></label>
+            <textarea id="coverLetter" rows="3" required placeholder="اكتب ملخصاً قصيراً عن خبراتك وطموحك المهني وكيف يمكنك الإضافة للوظيفة..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+        </div>
+
+        <!-- STEP 4: REVIEW & CONFIRMATION -->
+        <div id="stepPanel4" class="step-panel space-y-6 hidden">
+          <div class="border-b border-slate-100 pb-4 flex items-center justify-between">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">رابعاً: مراجعة البيانات وتأكيد التسجيل</h2>
+              <p class="text-xs text-slate-500 mt-0.5">تأكد من صحة جميع بياناتك قبل إرسال طلب الاستفادة من الوظيفة</p>
+            </div>
+            <span class="text-xs bg-emerald-50 text-emerald-700 font-semibold px-3 py-1 rounded-full">الخطوة الأخيرة</span>
+          </div>
+
+          <div id="reviewSummaryBox" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+          <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+            <input id="pledgeCheckbox" type="checkbox" class="mt-1 w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" />
+            <label for="pledgeCheckbox" class="text-xs sm:text-sm text-slate-700 font-medium cursor-pointer leading-relaxed">
+              أقرّ بأن جميع البيانات والمعلومات المدخلة في هذا النموذج صحيحة ودقيقة وتخصني شخصياً، وأتحمل كامل المسؤولية عن صحتها للاستفادة من الشاغر الوظيفي.
+            </label>
+          </div>
+        </div>
+
+        <!-- Bottom Form Navigation Controls -->
+        <div class="mt-7 pt-4 border-t border-slate-100 flex items-center justify-between gap-3 no-print">
+          <button id="btnPrevStep" type="button" class="px-5 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-sm font-bold transition hidden">
+            السابق
+          </button>
+          <div class="flex items-center gap-2 mr-auto">
+            <button id="btnResetForm" type="button" class="px-4 py-2.5 rounded-xl text-rose-600 hover:bg-rose-50 text-xs sm:text-sm font-semibold transition">
+              تفريغ الحقول
+            </button>
+            <button id="btnNextStep" type="button" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-sm transition">
+              الخطوة التالية
+            </button>
+            <button id="btnSubmitForm" type="submit" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-sm transition hidden">
+              إرسال وتأكيد التسجيل
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- VIEW 2: SUBMITTED APPLICATIONS DASHBOARD -->
+    <section id="recordsView" class="space-y-6 hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4 mb-5">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">سجل طلبات التوظيف المسجلة</h2>
+            <p class="text-xs text-slate-500 mt-0.5">يمكنك البحث، معاينة بطاقة المتقدم، طباعتها، أو تصدير جميع الطلبات</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="btnExportCsv" type="button" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+              تصدير CSV
+            </button>
+            <button id="btnNewApp" type="button" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition">
+              + تسجيل طلب جديد
+            </button>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+          <input id="searchRecordsInput" type="text" placeholder="ابحث بالاسم، رقم الهوية، أو المسمى الوظيفي..." class="sm:col-span-2 rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <select id="filterDeptSelect" class="rounded-xl border border-slate-300 px-3.5 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="all">جميع الأقسام الوظيفية</option>
+            <option value="تكنولوجيا المعلومات والبرمجة">تكنولوجيا المعلومات والبرمجة</option>
+            <option value="الإدارة والموارد البشرية">الإدارة والموارد البشرية</option>
+            <option value="المحاسبة والمالية">المحاسبة والمالية</option>
+            <option value="التسويق والمبيعات">التسويق والمبيعات</option>
+            <option value="الهندسة والإنشاءات">الهندسة والإنشاءات</option>
+            <option value="التعليم والتدريب">التعليم والتدريب</option>
+            <option value="الصحة والرعاية">الصحة والرعاية</option>
+            <option value="الخدمات اللوجستية والميدانية">الخدمات اللوجستية والميدانية</option>
+          </select>
+        </div>
+
+        <!-- Applications Table / Cards -->
+        <div id="recordsContainer" class="space-y-3"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal for Viewing Application Card -->
+  <div id="detailModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 p-6 space-y-5">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <span id="modalRefBadge" class="text-xs font-bold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md"></span>
+          <h3 id="modalApplicantName" class="text-lg font-extrabold text-slate-900 mt-1"></h3>
+        </div>
+        <button id="btnCloseModal" type="button" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold no-print">✕</button>
+      </div>
+
+      <div id="modalBodyContent" class="space-y-4 text-sm"></div>
+
+      <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-2 no-print">
+        <button id="btnPrintModal" type="button" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition">
+          طباعة بطاقة المتقدم
+        </button>
+        <button id="btnCloseModalBottom" type="button" class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold transition">
+          إغلاق
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      currentStep: 1,
+      viewMode: 'form',
+      skills: ['العمل الجماعي', 'إجادة استخدام الحاسوب'],
+      experiences: [],
+      cvFileName: '',
+      applications: [
+        {
+          id: 'JOB-9041',
+          submittedAt: '2026-11-09 18:15',
+          status: 'قيد المراجعة',
+          fullName: 'سارة محمود خليل الشوا',
+          nationalId: '405918273',
+          birthDate: '1998-05-14',
+          gender: 'أنثى',
+          maritalStatus: 'عزباء',
+          phone: '0598234567',
+          altPhone: '0567112233',
+          email: 'sara.shawa@example.com',
+          city: 'غزة',
+          address: 'حي الرمال - شارع الوحدة',
+          degree: 'بكالوريوس',
+          major: 'إدارة أعمال ومشاريع',
+          university: 'الجامعة الإسلامية',
+          gradYear: '2021',
+          gpa: 'امتياز (91.4%)',
+          englishLevel: 'ممتاز',
+          skills: ['إدارة المشاريع', 'التنسيق الميداني', 'إعداد التقارير', 'مايكروسوفت أوفيس'],
+          courses: 'شهادة PMP التأسيسية، دورة إعداد التقارير الإدارية والمالية',
+          jobTitle: 'منسقة مشاريع إنسانية وتنموية',
+          department: 'الإدارة والموارد البشرية',
+          workType: 'دوام كامل',
+          expYears: '3 - 5 سنوات',
+          expectedSalary: '950 دولار',
+          availableDate: 'فوراً',
+          experiences: [
+            { company: 'مؤسسة الأمل التنموية', role: 'مساعد منسق مشاريع', period: '2022 - 2025' }
+          ],
+          cvFileName: 'Sara_Shawa_CV.pdf',
+          portfolioUrl: 'https://linkedin.com/in/sara-shawa',
+          coverLetter: 'أمتلك خبرة عملية تزيد عن 3 سنوات في تنسيق المشاريع الميدانية وإعداد التقارير الدورية ومتابعة المستفيدين بدقة عالية.'
+        }
+      ]
+    };
+
+    try {
+      const saved = localStorage.getItem('job_portal_applications_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          state.applications = parsed;
+        }
+      }
+    } catch (e) {}
+
+    function saveApplicationsToStorage() {
+      try {
+        localStorage.setItem('job_portal_applications_v1', JSON.stringify(state.applications));
+      } catch (e) {}
+    }
+
+    function showToast(message, type = 'success') {
+      const box = document.getElementById('toastBox');
+      const msg = document.getElementById('toastMessage');
+      const icon = document.getElementById('toastIcon');
+      msg.textContent = message;
+      icon.className = 'w-2.5 h-2.5 rounded-full shrink-0 ' + (type === 'error' ? 'bg-rose-400' : 'bg-emerald-400');
+      box.classList.remove('hidden');
+      setTimeout(() => {
+        box.classList.add('hidden');
+      }, 3200);
+    }
+
+    function renderSkills() {
+      const container = document.getElementById('skillsContainer');
+      container.innerHTML = '';
+      if (state.skills.length === 0) {
+        container.innerHTML = '<span class="text-xs text-slate-400">لم تتم إضافة مهارات بعد.</span>';
+        return;
+      }
+      state.skills.forEach((skill, idx) => {
+        const badge = document.createElement('span');
+        badge.className = 'inline-flex items-center gap-1.5 bg-blue-50 text-blue-800 border border-blue-200 px-3 py-1 rounded-full text-xs font-semibold';
+        badge.innerHTML = `<span>${escapeHtml(skill)}</span>`;
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'text-blue-500 hover:text-rose-600 font-bold';
+        delBtn.textContent = '×';
+        delBtn.addEventListener('click', () => {
+          state.skills.splice(idx, 1);
+          renderSkills();
+        });
+        badge.appendChild(delBtn);
+        container.appendChild(badge);
+      });
+    }
+
+    function renderExperiences() {
+      const container = document.getElementById('expListContainer');
+      container.innerHTML = '';
+      if (state.experiences.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-400">لا توجد خبرات مضافة حالياً (يمكنك التقديم كحديث تخرج أو إضافة خبراتك أعلاه).</p>';
+        return;
+      }
+      state.experiences.forEach((exp, idx) => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between bg-white px-3.5 py-2 rounded-xl border border-slate-200 text-xs';
+        row.innerHTML = `
+          <div>
+            <span class="font-bold text-slate-800">${escapeHtml(exp.role)}</span>
+            <span class="text-slate-500 mx-1">لدى</span>
+            <span class="font-semibold text-indigo-700">${escapeHtml(exp.company)}</span>
+            <span class="text-slate-400 mr-2">(${escapeHtml(exp.period)})</span>
+          </div>
+        `;
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'text-rose-500 hover:text-rose-700 font-bold px-2 py-0.5';
+        removeBtn.textContent = 'حذف';
+        removeBtn.addEventListener('click', () => {
+          state.experiences.splice(idx, 1);
+          renderExperiences();
+        });
+        row.appendChild(removeBtn);
+        container.appendChild(row);
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function collectFormValues() {
+      return {
+        fullName: document.getElementById('fullName').value.trim(),
+        nationalId: document.getElementById('nationalId').value.trim(),
+        birthDate: document.getElementById('birthDate').value,
+        gender: document.getElementById('gender').value,
+        maritalStatus: document.getElementById('maritalStatus').value,
+        phone: document.getElementById('phone').value.trim(),
+        altPhone: document.getElementById('altPhone').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        city: document.getElementById('city').value.trim(),
+        address: document.getElementById('address').value.trim(),
+        degree: document.getElementById('degree').value,
+        major: document.getElementById('major').value.trim(),
+        university: document.getElementById('university').value.trim(),
+        gradYear: document.getElementById('gradYear').value.trim(),
+        gpa: document.getElementById('gpa').value.trim(),
+        englishLevel: document.getElementById('englishLevel').value,
+        skills: [...state.skills],
+        courses: document.getElementById('courses').value.trim(),
+        jobTitle: document.getElementById('jobTitle').value.trim(),
+        department: document.getElementById('department').value,
+        workType: document.getElementById('workType').value,
+        expYears: document.getElementById('expYears').value,
+        expectedSalary: document.getElementById('expectedSalary').value.trim(),
+        availableDate: document.getElementById('availableDate').value,
+        experiences: [...state.experiences],
+        cvFileName: state.cvFileName || 'لم يتم إرفاق ملف',
+        portfolioUrl: document.getElementById('portfolioUrl').value.trim(),
+        coverLetter: document.getElementById('coverLetter').value.trim()
+      };
+    }
+
+    function validateStep(step) {
+      const v = collectFormValues();
+      if (step === 1) {
+        if (!v.fullName || !v.nationalId || !v.birthDate || !v.phone || !v.email || !v.city || !v.address) {
+          showToast('يرجى تعبئة جميع الحقول الشخصية الأساسية المطلوبة (*)', 'error');
+          return false;
+        }
+      } else if (step === 2) {
+        if (!v.major || !v.university || !v.gradYear) {
+          showToast('يرجى إدخال التخصص الدراسي، الجامعة، وسنة التخرج (*)', 'error');
+          return false;
+        }
+      } else if (step === 3) {
+        if (!v.jobTitle || !v.coverLetter) {
+          showToast('يرجى تحديد المسمى الوظيفي المطلوب وكتابة نبذة تعريفية مختصرة (*)', 'error');
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function renderReviewSummary() {
+      const v = collectFormValues();
+      const box = document.getElementById('reviewSummaryBox');
+      box.innerHTML = `
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs">
+          <div class="font-bold text-blue-800 text-sm border-b border-slate-200 pb-1.5 mb-2">1. البيانات الشخصية</div>
+          <div><span class="text-slate-500">الاسم الكامل:</span> <span class="font-bold text-slate-900">${escapeHtml(v.fullName || '—')}</span></div>
+          <div><span class="text-slate-500">رقم الهوية:</span> <span class="font-semibold">${escapeHtml(v.nationalId || '—')}</span></div>
+          <div><span class="text-slate-500">تاريخ الميلاد والجنس:</span> <span class="font-semibold">${escapeHtml(v.birthDate || '—')} (${escapeHtml(v.gender)})</span></div>
+          <div><span class="text-slate-500">الجوال والبريد:</span> <span class="font-semibold">${escapeHtml(v.phone || '—')} | ${escapeHtml(v.email || '—')}</span></div>
+          <div><span class="text-slate-500">العنوان:</span> <span class="font-semibold">${escapeHtml(v.city || '—')} - ${escapeHtml(v.address || '—')}</span></div>
+        </div>
+
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs">
+          <div class="font-bold text-blue-800 text-sm border-b border-slate-200 pb-1.5 mb-2">2. المؤهلات والمهارات</div>
+          <div><span class="text-slate-500">المؤهل والتخصص:</span> <span class="font-bold text-slate-900">${escapeHtml(v.degree)} - ${escapeHtml(v.major || '—')}</span></div>
+          <div><span class="text-slate-500">الجامعة وسنة التخرج:</span> <span class="font-semibold">${escapeHtml(v.university || '—')} (${escapeHtml(v.gradYear || '—')})</span></div>
+          <div><span class="text-slate-500">المعدل واللغة الإنجليزية:</span> <span class="font-semibold">${escapeHtml(v.gpa || 'غير محدد')} | إنجليزي: ${escapeHtml(v.englishLevel)}</span></div>
+          <div><span class="text-slate-500">المهارات:</span> <span class="font-semibold">${escapeHtml(v.skills.join('، ') || '—')}</span></div>
+        </div>
+
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs md:col-span-2">
+          <div class="font-bold text-blue-800 text-sm border-b border-slate-200 pb-1.5 mb-2">3. الوظيفة المطلوبة والخبرات</div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div><span class="text-slate-500">المسمى الوظيفي:</span> <span class="font-bold text-slate-900">${escapeHtml(v.jobTitle || '—')}</span></div>
+            <div><span class="text-slate-500">القسم:</span> <span class="font-semibold">${escapeHtml(v.department)}</span></div>
+            <div><span class="text-slate-500">نوع الدوام والخبرة:</span> <span class="font-semibold">${escapeHtml(v.workType)} (${escapeHtml(v.expYears)})</span></div>
+            <div><span class="text-slate-500">الراتب المتوقع:</span> <span class="font-semibold">${escapeHtml(v.expectedSalary || 'قابل للتفاوض')}</span></div>
+            <div><span class="text-slate-500">تاريخ المباشرة:</span> <span class="font-semibold">${escapeHtml(v.availableDate)}</span></div>
+            <div><span class="text-slate-500">ملف السيرة الذاتية:</span> <span class="font-semibold text-blue-700">${escapeHtml(v.cvFileName)}</span></div>
+          </div>
+          <div class="pt-2"><span class="text-slate-500">النبذة التعريفية:</span> <p class="mt-1 text-slate-700 bg-white p-2.5 rounded-lg border border-slate-200">${escapeHtml(v.coverLetter || '—')}</p></div>
+        </div>
+      `;
+    }
+
+    function goToStep(step) {
+      state.currentStep = step;
+      for (let i = 1; i <= 4; i++) {
+        const panel = document.getElementById('stepPanel' + i);
+        if (i === step) {
+          panel.classList.remove('hidden');
+        } else {
+          panel.classList.add('hidden');
+        }
+      }
+
+      document.querySelectorAll('.step-tab').forEach(btn => {
+        const s = Number(btn.getAttribute('data-step'));
+        btn.classList.remove('step-active', 'step-completed', 'border-slate-200', 'text-slate-600');
+        const circle = btn.querySelector('span');
+        if (s === step) {
+          btn.classList.add('step-active');
+          circle.className = 'w-7 h-7 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0';
+        } else if (s < step) {
+          btn.classList.add('step-completed');
+          circle.className = 'w-7 h-7 rounded-lg bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shrink-0';
+        } else {
+          btn.classList.add('border-slate-200', 'text-slate-600');
+          circle.className = 'w-7 h-7 rounded-lg bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0';
+        }
+      });
+
+      const pct = step * 25;
+      document.getElementById('completionPercent').textContent = pct + '%';
+      document.getElementById('progressBar').style.width = pct + '%';
+
+      const btnPrev = document.getElementById('btnPrevStep');
+      const btnNext = document.getElementById('btnNextStep');
+      const btnSubmit = document.getElementById('btnSubmitForm');
+
+      btnPrev.classList.toggle('hidden', step === 1);
+      btnNext.classList.toggle('hidden', step === 4);
+      btnSubmit.classList.toggle('hidden', step !== 4);
+
+      if (step === 4) {
+        renderReviewSummary();
+      }
+    }
+
+    function updateBadgeCount() {
+      document.getElementById('savedCountBadge').textContent = state.applications.length;
+    }
+
+    function renderRecordsList() {
+      updateBadgeCount();
+      const container = document.getElementById('recordsContainer');
+      const q = document.getElementById('searchRecordsInput').value.trim().toLowerCase();
+      const dept = document.getElementById('filterDeptSelect').value;
+
+      const filtered = state.applications.filter(app => {
+        const matchesDept = dept === 'all' || app.department === dept;
+        const matchesQuery = !q ||
+          app.fullName.toLowerCase().includes(q) ||
+          app.nationalId.toLowerCase().includes(q) ||
+          app.jobTitle.toLowerCase().includes(q) ||
+          app.id.toLowerCase().includes(q);
+        return matchesDept && matchesQuery;
+      });
+
+      container.innerHTML = '';
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+            <p class="text-sm font-bold text-slate-600">لا توجد طلبات مطابقة للبحث حالياً</p>
+            <p class="text-xs text-slate-400 mt-1">يمكنك تسجيل طلب جديد من خلال النموذج الرئيسي</p>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(app => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-50 hover:bg-white transition rounded-xl p-4 border border-slate-200 flex flex-wrap items-center justify-between gap-4';
+        card.innerHTML = `
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-extrabold bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-md">${escapeHtml(app.id)}</span>
+              <span class="text-xs font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-md">${escapeHtml(app.status)}</span>
+              <span class="text-[11px] text-slate-400">${escapeHtml(app.submittedAt)}</span>
+            </div>
+            <h3 class="text-base font-bold text-slate-900">${escapeHtml(app.fullName)}</h3>
+            <p class="text-xs text-slate-600">
+              <span class="font-semibold text-indigo-700">${escapeHtml(app.jobTitle)}</span>
+              • ${escapeHtml(app.department)} • ${escapeHtml(app.degree)} (${escapeHtml(app.major)}) • جوال: ${escapeHtml(app.phone)}
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" class="btn-view-app px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition">
+              معاينة البطاقة
+            </button>
+            <button type="button" class="btn-delete-app px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold transition">
+              حذف
+            </button>
+          </div>
+        `;
+
+        card.querySelector('.btn-view-app').addEventListener('click', () => openApplicationModal(app));
+        card.querySelector('.btn-delete-app').addEventListener('click', () => {
+          state.applications = state.applications.filter(item => item.id !== app.id);
+          saveApplicationsToStorage();
+          renderRecordsList();
+          showToast('تم حذف الطلب من السجل');
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    function openApplicationModal(app) {
+      document.getElementById('modalRefBadge').textContent = `رقم الطلب: ${app.id} | تاريخ التسجيل: ${app.submittedAt}`;
+      document.getElementById('modalApplicantName').textContent = app.fullName;
+
+      const expHtml = (app.experiences && app.experiences.length > 0)
+        ? app.experiences.map(e => `<li class="text-xs text-slate-700">• <strong>${escapeHtml(e.role)}</strong> في ${escapeHtml(e.company)} (${escapeHtml(e.period)})</li>`).join('')
+        : '<li class="text-xs text-slate-400">لا توجد خبرات سابقة مسجلة</li>';
+
+      document.getElementById('modalBodyContent').innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+          <div><span class="text-slate-500">رقم الهوية:</span> <strong class="text-slate-800">${escapeHtml(app.nationalId)}</strong></div>
+          <div><span class="text-slate-500">تاريخ الميلاد والجنس:</span> <strong class="text-slate-800">${escapeHtml(app.birthDate)} (${escapeHtml(app.gender)})</strong></div>
+          <div><span class="text-slate-500">رقم الجوال:</span> <strong class="text-slate-800">${escapeHtml(app.phone)}</strong></div>
+          <div><span class="text-slate-500">البريد الإلكتروني:</span> <strong class="text-slate-800">${escapeHtml(app.email)}</strong></div>
+          <div class="sm:col-span-2"><span class="text-slate-500">العنوان:</span> <strong class="text-slate-800">${escapeHtml(app.city)} - ${escapeHtml(app.address)}</strong></div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+          <div><span class="text-slate-500">الوظيفة المطلوبة:</span> <strong class="text-blue-700">${escapeHtml(app.jobTitle)}</strong></div>
+          <div><span class="text-slate-500">القسم:</span> <strong class="text-slate-800">${escapeHtml(app.department)}</strong></div>
+          <div><span class="text-slate-500">المؤهل العلمي:</span> <strong class="text-slate-800">${escapeHtml(app.degree)} - ${escapeHtml(app.major)}</strong></div>
+          <div><span class="text-slate-500">الجامعة وسنة التخرج:</span> <strong class="text-slate-800">${escapeHtml(app.university)} (${escapeHtml(app.gradYear)})</strong></div>
+          <div><span class="text-slate-500">سنوات الخبرة ونوع الدوام:</span> <strong class="text-slate-800">${escapeHtml(app.expYears)} | ${escapeHtml(app.workType)}</strong></div>
+          <div><span class="text-slate-500">الراتب المتوقع والمباشرة:</span> <strong class="text-slate-800">${escapeHtml(app.expectedSalary || 'قابل للتفاوض')} | ${escapeHtml(app.availableDate)}</strong></div>
+        </div>
+
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+          <div class="text-xs font-bold text-slate-700">المهارات:</div>
+          <div class="flex flex-wrap gap-1.5">
+            ${(app.skills || []).map(s => `<span class="bg-blue-50 text-blue-800 border border-blue-200 px-2.5 py-0.5 rounded-full text-xs">${escapeHtml(s)}</span>`).join('')}
+          </div>
+          <div class="text-xs font-bold text-slate-700 pt-2">الخبرات العملية:</div>
+          <ul class="space-y-1">${expHtml}</ul>
+          <div class="text-xs font-bold text-slate-700 pt-2">النبذة التعريفية:</div>
+          <p class="text-xs text-slate-700 bg-white p-2.5 rounded-lg border border-slate-200 leading-relaxed">${escapeHtml(app.coverLetter)}</p>
+        </div>
+      `;
+
+      const modal = document.getElementById('detailModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeApplicationModal() {
+      const modal = document.getElementById('detailModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function switchMainView(target) {
+      state.viewMode = target;
+      const formSection = document.getElementById('formView');
+      const recordsSection = document.getElementById('recordsView');
+      const label = document.getElementById('switchViewLabel');
+
+      if (target === 'records') {
+        formSection.classList.add('hidden');
+        recordsSection.classList.remove('hidden');
+        label.innerHTML = 'العودة لنموذج التسجيل';
+        renderRecordsList();
+      } else {
+        recordsSection.classList.add('hidden');
+        formSection.classList.remove('hidden');
+        label.innerHTML = `سجل الطلبات (<span id="savedCountBadge">${state.applications.length}</span>)`;
+      }
+    }
+
+    function fillDemoData() {
+      document.getElementById('fullName').value = 'محمد سامي عبد الرحمن الفرا';
+      document.getElementById('nationalId').value = '408192837';
+      document.getElementById('birthDate').value = '1999-08-22';
+      document.getElementById('gender').value = 'ذكر';
+      document.getElementById('maritalStatus').value = 'أعزب / عزباء';
+      document.getElementById('phone').value = '0599876543';
+      document.getElementById('altPhone').value = '0568876543';
+      document.getElementById('email').value = 'm.farra.dev@example.com';
+      document.getElementById('city').value = 'خانيونس';
+      document.getElementById('address').value = 'وسط البلد - بالقرب من المركز الثقافي';
+      document.getElementById('degree').value = 'بكالوريوس';
+      document.getElementById('major').value = 'نظم معلومات حاسوبية';
+      document.getElementById('university').value = 'جامعة الأزهر';
+      document.getElementById('gradYear').value = '2022';
+      document.getElementById('gpa').value = 'جيد جداً (86.5%)';
+      document.getElementById('englishLevel').value = 'جيد جداً';
+      state.skills = ['تطوير تطبيقات الويب', 'إدارة قواعد البيانات', 'تحليل النظم', 'الدعم الفني', 'العمل الجماعي'];
+      renderSkills();
+      document.getElementById('courses').value = 'دورة تطوير واجهات الويب الحديثة، شهادة إدارة قواعد البيانات SQL، دورة مهارات التواصل المهني';
+      document.getElementById('jobTitle').value = 'أخصائي نظم معلومات ودعم تقني';
+      document.getElementById('department').value = 'تكنولوجيا المعلومات والبرمجة';
+      document.getElementById('workType').value = 'دوام كامل';
+      document.getElementById('expYears').value = '1 - 3 سنوات';
+      document.getElementById('expectedSalary').value = '900 دولار';
+      document.getElementById('availableDate').value = 'فوراً';
+      state.experiences = [
+        { company: 'شركة الرواد للحلول الرقمية', role: 'مطور نظم ودعم فني', period: '2023 - 2025' }
+      ];
+      renderExperiences();
+      state.cvFileName = 'Mohammed_Farra_Resume_2026.pdf';
+      document.getElementById('cvFileName').textContent = state.cvFileName;
+      document.getElementById('portfolioUrl').value = 'https://linkedin.com/in/mohammed-farra';
+      document.getElementById('coverLetter').value = 'أسعى لتوظيف خبرتي التقنية ومهاراتي في إدارة قواعد البيانات وتطوير الأنظمة للمساهمة الفعالة في تحسين سير العمل وتقديم حلول رقمية سريعة وموثوقة.';
+      if (state.currentStep === 4) {
+        renderReviewSummary();
+      }
+      showToast('تمت تعبئة النموذج ببيانات تجريبية كاملة');
+    }
+
+    // Event Listeners Setup
+    window.addEventListener('DOMContentLoaded', () => {
+      renderSkills();
+      renderExperiences();
+      updateBadgeCount();
+
+      document.querySelectorAll('.step-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetStep = Number(btn.getAttribute('data-step'));
+          if (targetStep > state.currentStep && !validateStep(state.currentStep)) {
+            return;
+          }
+          goToStep(targetStep);
+        });
+      });
+
+      document.getElementById('btnNextStep').addEventListener('click', () => {
+        if (validateStep(state.currentStep) && state.currentStep < 4) {
+          goToStep(state.currentStep + 1);
+        }
+      });
+
+      document.getElementById('btnPrevStep').addEventListener('click', () => {
+        if (state.currentStep > 1) {
+          goToStep(state.currentStep - 1);
+        }
+      });
+
+      document.getElementById('btnAddSkill').addEventListener('click', () => {
+        const input = document.getElementById('skillInput');
+        const val = input.value.trim();
+        if (val && !state.skills.includes(val)) {
+          state.skills.push(val);
+          input.value = '';
+          renderSkills();
+        }
+      });
+
+      document.getElementById('skillInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          document.getElementById('btnAddSkill').click();
+        }
+      });
+
+      document.querySelectorAll('.quick-skill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const skill = btn.getAttribute('data-quick-skill');
+          if (skill && !state.skills.includes(skill)) {
+            state.skills.push(skill);
+            renderSkills();
+          }
+        });
+      });
+
+      document.getElementById('btnAddExp').addEventListener('click', () => {
+        const company = document.getElementById('expCompany').value.trim();
+        const role = document.getElementById('expRole').value.trim();
+        const period = document.getElementById('expPeriod').value.trim();
+        if (!company || !role) {
+          showToast('يرجى إدخال اسم جهة العمل والمسمى الوظيفي لإضافة الخبرة', 'error');
+          return;
+        }
+        state.experiences.push({ company, role, period: period || 'غير محدد' });
+        document.getElementById('expCompany').value = '';
+        document.getElementById('expRole').value = '';
+        document.getElementById('expPeriod').value = '';
+        renderExperiences();
+      });
+
+      document.getElementById('cvFile').addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+          state.cvFileName = `${file.name} (${Math.round(file.size / 1024)} KB)`;
+          document.getElementById('cvFileName').textContent = state.cvFileName;
+        }
+      });
+
+      document.getElementById('btnFillDemo').addEventListener('click', fillDemoData);
+
+      document.getElementById('btnResetForm').addEventListener('click', () => {
+        document.getElementById('applicationForm').reset();
+        state.skills = [];
+        state.experiences = [];
+        state.cvFileName = '';
+        document.getElementById('cvFileName').textContent = 'اضغط لاختيار ملف السيرة الذاتية...';
+        renderSkills();
+        renderExperiences();
+        goToStep(1);
+        showToast('تم تفريغ الحقول لإدخال بيانات جديدة');
+      });
+
+      document.getElementById('applicationForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!validateStep(1) || !validateStep(2) || !validateStep(3)) {
+          return;
+        }
+        const pledge = document.getElementById('pledgeCheckbox');
+        if (!pledge.checked) {
+          showToast('يرجى الموافقة على إقرار صحة البيانات قبل إرسال الطلب', 'error');
+          return;
+        }
+
+        const values = collectFormValues();
+        const newApp = {
+          id: 'JOB-' + Math.floor(1000 + Math.random() * 9000),
+          submittedAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
+          status: 'تم الاستلام',
+          ...values
+        };
+
+        state.applications.unshift(newApp);
+        saveApplicationsToStorage();
+        updateBadgeCount();
+        showToast(`تم تسجيل طلبك بنجاح! رقم الطلب: ${newApp.id}`);
+        switchMainView('records');
+        openApplicationModal(newApp);
+      });
+
+      document.getElementById('btnSwitchView').addEventListener('click', () => {
+        switchMainView(state.viewMode === 'form' ? 'records' : 'form');
+      });
+
+      document.getElementById('btnNewApp').addEventListener('click', () => {
+        switchMainView('form');
+        goToStep(1);
+      });
+
+      document.getElementById('searchRecordsInput').addEventListener('input', renderRecordsList);
+      document.getElementById('filterDeptSelect').addEventListener('change', renderRecordsList);
+
+      document.getElementById('btnCloseModal').addEventListener('click', closeApplicationModal);
+      document.getElementById('btnCloseModalBottom').addEventListener('click', closeApplicationModal);
+      document.getElementById('btnPrintModal').addEventListener('click', () => window.print());
+
+      document.getElementById('btnExportCsv').addEventListener('click', () => {
+        if (state.applications.length === 0) {
+          showToast('لا توجد طلبات لتصديرها', 'error');
+          return;
+        }
+        const headers = ['رقم الطلب', 'الاسم الكامل', 'رقم الهوية', 'الجوال', 'البريد الإلكتروني', 'المدينة', 'المؤهل', 'التخصص', 'الوظيفة المطلوبة', 'القسم', 'سنوات الخبرة'];
+        const rows = state.applications.map(a => [
+          a.id, a.fullName, a.nationalId, a.phone, a.email, a.city, a.degree, a.major, a.jobTitle, a.department, a.expYears
+        ]);
+        const csvContent = '\uFEFF' + [headers, ...rows].map(r => r.map(field => `"${String(field || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'job_applications.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('تم تصدير سجل الطلبات بصيغة CSV');
+      });
+    });
+  </script>
+</body>
+</html>
